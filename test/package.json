@@ -1,0 +1,20 @@
+{
+  "name": "smart-slider-test",
+  "version": "1.0.0",
+  "build": 38,
+  "description": "",
+  "main": "gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexander Pivovarov aka bladerunner2020",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "iridium-grunt": "git+https://github.com/bladerunner2020/iridium-grunt.git"
+  },
+  "projectScripts": [
+    "../index.js",
+    "scripts/app.js"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "smart-slider",
+  "version": "1.0.0",
+  "description": "SmartSlider control for i3pro iridium mobile",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Alexander Pivovarov aka balderunner2020",
+    "email": "pivovarov@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {}
+}
