@@ -1,6 +1,6 @@
 {
   "name": "smart-slider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SmartSlider control for i3pro iridium mobile",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Alexander Pivovarov aka balderunner2020",
+    "name": "Alexander Pivovarov aka bladerunner2020",
     "email": "pivovarov@gmail.com"
   },
   "license": "MIT",

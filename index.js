@@ -16,9 +16,11 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     var that = this;
     this.slider = item;
 
+    this.labelFactor = 1;
+
     /**
      * Set value label item that is moved together with slider
-     * @param {object} item - value lable item 
+     * @param {object} item - value label item 
      */
     this.setValueItem = function(item) {
         this.valueLabel = item;
@@ -31,7 +33,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {number} min - minimal X to move value label, if undefined - no limit
      * @param {number} max - maximal X to move value label, if undefined - no limit
      */
-    this.setLimits = function(min, max) {
+    this.setLabelLimits = function(min, max) {
         this.minX = min;
         this.maxX = max;
         return this;
@@ -85,7 +87,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
 
         var width = this.slider.Width;
         var value = this.slider.Value;
-        var maxValue = this.slider.Max;     
+        var maxValue = this.slider.Max;  
+        var minValue = this.slider.Min;   
 
         var newX = x + Math.floor(width/maxValue * value);
         newX += that.valueLabelOffsetX;
@@ -99,12 +102,12 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         }
          
         if (that.valueLabel) {
-            that.valueLabel.Value = value;
-            that.valueLabel.X = newX;
+            this.valueLabel.Value = value;
+            this.valueLabel.X = newX;
         }
 
         if (this.gradient) {
-            var index = Math.floor(value);
+            var index = Math.floor(value - minValue);
             index = index < 0 ? 0 : index >= this.gradient.length ? this.gradient.length - 1 : index;
             var colorArr = this.gradient[index];
             var color = colorArr[0] * Math.pow(256, 3) + colorArr[1] * Math.pow(256, 2) + colorArr[2] * Math.pow(256, 1) + this.alphaChannel; 
