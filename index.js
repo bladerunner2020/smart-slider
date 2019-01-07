@@ -158,7 +158,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         if (startValue == undefined) { startValue = this.slider.Min; }
         if (this.animationTime == undefined) { 
             this.setValue(newValue);
-            return this.update(); 
+            return; 
         }
 
         if (this.animationTimer) {
@@ -197,9 +197,74 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
                 return;
             }
             that.setValue(value);
-            that.update();
         });       
     };
+
+    this.updateXX = function(newValue, startValue) {
+        if (newValue == undefined) { newValue = this.slider.Value; }
+        if (startValue == undefined) { startValue = this.slider.Min; }
+        if (this.animationTime == undefined) { 
+            this.setValue(newValue);
+            return; 
+        }
+
+        var animationData = {};
+        animationData.startValue = startValue;
+        animationData.endValue = newValue;
+        animationData.duration = this.animationTime;
+
+        this.startAnimation(animationData);
+
+    };
+
+    /**
+     * @param {number} elapsed - period of time in ms passed from the previous tick
+     */
+    this.onTick = function(elapsed) {
+        var slider = this.slider;
+        var animationData = this.animationData;
+        animationData.current += elapsed;
+        var duration = animationData.duration;
+        var value = 0;
+
+        if (animationData.endValue > animationData.startValue) {
+          
+            value = IR.Tween(IR.TWEEN_LINEAR, animationData.current, 0, animationData.endValue - animationData.startValue, duration);       
+            value += animationData.startValue;
+  
+            if (value >= animationData.endValue) {
+                slider.stopAnimation();
+                slider.setValue(animationData.endValue);
+                return;
+            }
+        } else {
+            value = IR.Tween(IR.TWEEN_LINEAR, animationData.current, 0, animationData.startValue - animationData.endValue, duration); 
+            value = animationData.startValue - value;
+            if (value <= animationData.endValue) {
+                slider.stopAnimation();
+                slider.setValue(animationData.endValue);
+                return;
+            }
+        }
+
+        
+        slider.setValue(value);
+    };
+
+    this.startAnimation = function(animationData) {
+        if (this.animationActive) { this.stopAnimation(); }
+
+        animationData.current = 0;
+        this.animationActive = true;
+        IR.AddListener(IR.EVENT_WORK, 0, this.onTick, {animationData:  animationData, slider: this});
+    };
+
+    this.stopAnimation = function() {
+        this.animationActive = false;
+        IR.RemoveListener(IR.EVENT_WORK, 0, this.onTick);
+    };
+
+
 
     IR.AddListener(IR.EVENT_MOUSE_MOVE, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_ITEM_PRESS, this.slider, this.update, this);

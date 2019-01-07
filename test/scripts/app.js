@@ -34,26 +34,26 @@ slider2
 
 // eslint-disable-next-line no-unused-vars
 function animate() {
-    slider.updateX();
-    slider2.updateX();
+    slider.updateXX();
+    slider2.updateXX();
 }
 
 function set0() {   // eslint-disable-line no-unused-vars
-    slider2.updateX(0, slider2.getValue());
+    slider2.updateXX(0, slider2.getValue());
 }
 
 function set10() {  // eslint-disable-line no-unused-vars
-    slider2.updateX(10, slider2.getValue());
+    slider2.updateXX(10, slider2.getValue());
 }
 
 function set20() {  // eslint-disable-line no-unused-vars
-    slider2.updateX(20, slider2.getValue());
+    slider2.updateXX(20, slider2.getValue());
 }
 
 function set30() {  // eslint-disable-line no-unused-vars
-    slider2.updateX(30, slider2.getValue());
+    slider2.updateXX(30, slider2.getValue());
 }
 
 function set40() {  // eslint-disable-line no-unused-vars
-    slider2.updateX(40, slider2.getValue());
+    slider2.updateXX(40, slider2.getValue());
 }
