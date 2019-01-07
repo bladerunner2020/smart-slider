@@ -8,8 +8,7 @@
 
 /* global IR, SmartSlider, createColorGradient */
 
-// eslint-disable-next-line no-undef
-_Debug = IR.Log;
+_Debug = IR.Log;    // eslint-disable-line no-undef
 
 var slider = new SmartSlider(IR.GetPage('Main').GetItem('Slider'));
 slider
@@ -39,22 +38,22 @@ function animate() {
     slider2.updateX();
 }
 
-function set0() {
+function set0() {   // eslint-disable-line no-unused-vars
     slider2.updateX(0, slider2.getValue());
 }
 
-function set10() {
+function set10() {  // eslint-disable-line no-unused-vars
     slider2.updateX(10, slider2.getValue());
 }
 
-function set20() {
+function set20() {  // eslint-disable-line no-unused-vars
     slider2.updateX(20, slider2.getValue());
 }
 
-function set30() {
+function set30() {  // eslint-disable-line no-unused-vars
     slider2.updateX(30, slider2.getValue());
 }
 
-function set40() {
+function set40() {  // eslint-disable-line no-unused-vars
     slider2.updateX(40, slider2.getValue());
 }
