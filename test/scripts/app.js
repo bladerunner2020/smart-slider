@@ -8,10 +8,14 @@
 
 /* global IR, SmartSlider, createColorGradient */
 
+// eslint-disable-next-line no-undef
+_Debug = IR.Log;
+
 var slider = new SmartSlider(IR.GetPage('Main').GetItem('Slider'));
 slider
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel'))
     .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
+    .setAnimation(500)
     .setAutoUpdate(500)
     .update();
 
@@ -26,5 +30,31 @@ slider2
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel2'))
     .setLabelLimits(260)
     .setGradientColors(gradient)
+    .setAnimation(500)
     .update();
 
+// eslint-disable-next-line no-unused-vars
+function animate() {
+    slider.updateX();
+    slider2.updateX();
+}
+
+function set0() {
+    slider2.updateX(0, slider2.getValue());
+}
+
+function set10() {
+    slider2.updateX(10, slider2.getValue());
+}
+
+function set20() {
+    slider2.updateX(20, slider2.getValue());
+}
+
+function set30() {
+    slider2.updateX(30, slider2.getValue());
+}
+
+function set40() {
+    slider2.updateX(40, slider2.getValue());
+}

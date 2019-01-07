@@ -1,4 +1,3 @@
-
 /*
  * smart-slider
  *
@@ -6,7 +5,13 @@
  * Licensed under the MIT license.
  */
 
-/* global IR */
+/* global IR, _DEBUGGER */
+
+if (typeof _DEBUGGER == 'undefined') {
+    var _Debug = function() {}; // empty function
+} else {
+    _DEBUGGER.disable('SmartSlider', 'DEBUG');
+}
 
 /**
  * 
@@ -51,13 +56,35 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     };
 
     /**
+     * @param {number} time - time in ms that is required for animation the entire slider to 100%
+     *                        factual time depends on the slider value - if slider value is min then 
+     *                        there is no animation at all
+     */
+    this.setAnimation = function(time) {
+        this.animationTime = time;
+        return this;
+    };
+
+    /**
      * Set value of slider and update
      * @param {number} value - slider value
+     * @param {boolean} animate - if animate updateX is called to draw the animation
      */
-    this.setValue = function(value) {
-        this.slider.Value = value;
-        this.update();
+    this.setValue = function(value, animate) {
+        if (animate) { 
+            this.updateX(value);
+        } else {
+            this.slider.Value = value;
+            this.update();
+        }
         return this;
+    };
+
+    /**
+     * @returns {number} - slider value
+     */
+    this.getValue = function() {
+        return this.slider.Value;
     };
 
     /**
@@ -73,7 +100,9 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         if (!pollTime) { return; }
 
         IR.SetInterval(pollTime, function(){
-            that.update();
+            if (!that.animationTimer) {
+                that.update();
+            }
         });
 
         return this;
@@ -118,11 +147,65 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         return this;
     };
 
+    /**
+     * Update with animation from startValue to newValue value. UpdateX without arguments animates slide bar
+     * from Min to the current value
+     * @param {number} [newValue] - if newValue is not set then animate to the current value
+     * @param {number} [startValue] - if startValue is not set min value is used
+     */
+    this.updateX = function(newValue, startValue) {
+        if (newValue == undefined) { newValue = this.slider.Value; }
+        if (startValue == undefined) { startValue = this.slider.Min; }
+        if (this.animationTime == undefined) { 
+            this.setValue(newValue);
+            return this.update(); 
+        }
+
+        if (this.animationTimer) {
+            IR.ClearInterval(this.animationTimer);
+            this.animationTimer = null;
+        }
+
+        var timeout = this.animationTime / (this.slider.Max - this.slider.Min);
+
+        // Minimal time to update slider - this value was obtained experimentally 
+        // Could be different for different platforms..
+        var maxCount = this.animationTime / 32;                                                 
+        var step = Math.floor((this.slider.Max - this.slider.Min) / maxCount) || 1;
+        step = newValue > startValue ? step : -step;
+
+        this.slider.Value = startValue;
+
+        var that = this;
+
+        var startTime = new Date().getTime();   // For debug purposes
+        var count = 0;                          // For debug purposes
+
+        this.animationTimer = IR.SetInterval(timeout, function() {
+            var value = that.slider.Value + step;
+            count++;
+            if ((step > 0 && value >= newValue) || (step < 0 && value <= newValue)) {
+                that.slider.Value = newValue;
+                that.update();
+                IR.ClearInterval(that.animationTimer);
+                that.animationTimer = null;
+
+                var endTime = new Date().getTime(); // For debug purposes
+                _Debug('Animation stats for ' + that.slider.Name + '. Count: ' + count + ', each update: ' + 
+                    ((endTime - startTime)/count).toFixed(1) + ' ms.', 'SmartSlider');
+
+                return;
+            }
+            that.setValue(value);
+            that.update();
+        });       
+    };
+
     IR.AddListener(IR.EVENT_MOUSE_MOVE, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_ITEM_PRESS, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_TOUCH_DOWN, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_TOUCH_MOVE, this.slider, this.update, this);
-    IR.AddListener(IR.EVENT_ITEM_SHOW, this.slider, this.update, this);
+    IR.AddListener(IR.EVENT_ITEM_SHOW, this.slider, function() { this.updateX(); }, this);
 }
 
 
@@ -147,7 +230,7 @@ function createColorGradient(color1, color2, steps) {           // eslint-disabl
         return result;
     }
 
-    function colorToColorArrar(color) {
+    function colorToColorArray(color) {
         var result = [];
         result[0] = (color >> 16) & 0xFF;
         result[1] = (color >> 8) & 0xFF;
@@ -163,8 +246,8 @@ function createColorGradient(color1, color2, steps) {           // eslint-disabl
     var factor = 1 / (steps - 1); 
     var gradient = [];
 
-    var colorArr1 = (typeof color1 != 'number') ? colorArr1 : colorToColorArrar(color1);
-    var colorArr2 = (typeof color2 != 'number') ? colorArr1 : colorToColorArrar(color2);
+    var colorArr1 = (typeof color1 != 'number') ? colorArr1 : colorToColorArray(color1);
+    var colorArr2 = (typeof color2 != 'number') ? colorArr1 : colorToColorArray(color2);
 
 
     for(var i = 0; i < steps; i++) {
