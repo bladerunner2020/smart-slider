@@ -14,7 +14,7 @@ var slider = new SmartSlider(IR.GetPage('Main').GetItem('Slider'));
 slider
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel'))
     .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
-    .setAnimation(500)
+    .setAnimation(500, IR.TWEEN_ELASTIC_IN_OUT)
     .setAutoUpdate(500)
     .update();
 
@@ -34,26 +34,26 @@ slider2
 
 // eslint-disable-next-line no-unused-vars
 function animate() {
-    slider.updateXX();
-    slider2.updateXX();
+    slider.updateX();
+    slider2.updateX();
 }
 
 function set0() {   // eslint-disable-line no-unused-vars
-    slider2.updateXX(0, slider2.getValue());
+    slider2.updateX(0, slider2.getValue());
 }
 
 function set10() {  // eslint-disable-line no-unused-vars
-    slider2.updateXX(10, slider2.getValue());
+    slider2.updateX(10, slider2.getValue());
 }
 
 function set20() {  // eslint-disable-line no-unused-vars
-    slider2.updateXX(20, slider2.getValue());
+    slider2.updateX(20, slider2.getValue());
 }
 
 function set30() {  // eslint-disable-line no-unused-vars
-    slider2.updateXX(30, slider2.getValue());
+    slider2.updateX(30, slider2.getValue());
 }
 
 function set40() {  // eslint-disable-line no-unused-vars
-    slider2.updateXX(40, slider2.getValue());
+    slider2.updateX(40, slider2.getValue());
 }

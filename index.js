@@ -59,8 +59,12 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {number} time - time in ms that is required for animation the entire slider to 100%
      *                        factual time depends on the slider value - if slider value is min then 
      *                        there is no animation at all
+     * @param {number} type - type of formula calculation (see IR.Tween), IR.TWEEN_LINEAR - default
      */
-    this.setAnimation = function(time) {
+    this.setAnimation = function(time, type) {
+        if (type == undefined) {
+            type = IR.TWEEN_LINEAR;
+        }
         this.animationTime = time;
         return this;
     };
@@ -161,64 +165,17 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
             return; 
         }
 
-        if (this.animationTimer) {
-            IR.ClearInterval(this.animationTimer);
-            this.animationTimer = null;
-        }
-
-        var timeout = this.animationTime / (this.slider.Max - this.slider.Min);
-
-        // Minimal time to update slider - this value was obtained experimentally 
-        // Could be different for different platforms..
-        var maxCount = this.animationTime / 32;                                                 
-        var step = Math.floor((this.slider.Max - this.slider.Min) / maxCount) || 1;
-        step = newValue > startValue ? step : -step;
-
-        this.slider.Value = startValue;
-
-        var that = this;
-
-        var startTime = new Date().getTime();   // For debug purposes
-        var count = 0;                          // For debug purposes
-
-        this.animationTimer = IR.SetInterval(timeout, function() {
-            var value = that.slider.Value + step;
-            count++;
-            if ((step > 0 && value >= newValue) || (step < 0 && value <= newValue)) {
-                that.slider.Value = newValue;
-                that.update();
-                IR.ClearInterval(that.animationTimer);
-                that.animationTimer = null;
-
-                var endTime = new Date().getTime(); // For debug purposes
-                _Debug('Animation stats for ' + that.slider.Name + '. Count: ' + count + ', each update: ' + 
-                    ((endTime - startTime)/count).toFixed(1) + ' ms.', 'SmartSlider');
-
-                return;
-            }
-            that.setValue(value);
-        });       
-    };
-
-    this.updateXX = function(newValue, startValue) {
-        if (newValue == undefined) { newValue = this.slider.Value; }
-        if (startValue == undefined) { startValue = this.slider.Min; }
-        if (this.animationTime == undefined) { 
-            this.setValue(newValue);
-            return; 
-        }
-
         var animationData = {};
         animationData.startValue = startValue;
         animationData.endValue = newValue;
         animationData.duration = this.animationTime;
 
         this.startAnimation(animationData);
-
     };
 
     /**
      * @param {number} elapsed - period of time in ms passed from the previous tick
+     * @this {animationData, slider}
      */
     this.onTick = function(elapsed) {
         var slider = this.slider;
@@ -246,11 +203,14 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
                 return;
             }
         }
-
         
         slider.setValue(value);
     };
 
+    /**
+     * Start animation
+     * @param {object} animationData
+     */
     this.startAnimation = function(animationData) {
         if (this.animationActive) { this.stopAnimation(); }
 
@@ -259,12 +219,13 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         IR.AddListener(IR.EVENT_WORK, 0, this.onTick, {animationData:  animationData, slider: this});
     };
 
+    /**
+     * Stop animation
+     */
     this.stopAnimation = function() {
         this.animationActive = false;
         IR.RemoveListener(IR.EVENT_WORK, 0, this.onTick);
     };
-
-
 
     IR.AddListener(IR.EVENT_MOUSE_MOVE, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_ITEM_PRESS, this.slider, this.update, this);
