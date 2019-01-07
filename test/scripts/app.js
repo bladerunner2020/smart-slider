@@ -29,7 +29,7 @@ slider2
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel2'))
     .setLabelLimits(260)
     .setGradientColors(gradient)
-    .setAnimation(500)
+    .setAnimation(500, IR.TWEEN_EXPO_IN)
     .update();
 
 // eslint-disable-next-line no-unused-vars
