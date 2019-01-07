@@ -14,7 +14,7 @@ var slider = new SmartSlider(IR.GetPage('Main').GetItem('Slider'));
 slider
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel'))
     .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
-    .setAnimation(500)
+    .setAnimation(500, IR.TWEEN_ELASTIC_IN_OUT)
     .setAutoUpdate(500)
     .update();
 
