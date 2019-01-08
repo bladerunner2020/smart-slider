@@ -5,13 +5,7 @@
  * Licensed under the MIT license.
  */
 
-/* global IR, _DEBUGGER */
-
-if (typeof _DEBUGGER == 'undefined') {
-    var _Debug = function() {}; // empty function
-} else {
-    _DEBUGGER.disable('SmartSlider', 'DEBUG');
-}
+/* global IR */
 
 /**
  * 
@@ -66,6 +60,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
             type = IR.TWEEN_LINEAR;
         }
         this.animationTime = time;
+        this.animationType = type;
         return this;
     };
 
@@ -185,26 +180,19 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         var value = 0;
 
         if (animationData.endValue > animationData.startValue) {
-          
-            value = IR.Tween(IR.TWEEN_LINEAR, animationData.current, 0, animationData.endValue - animationData.startValue, duration);       
+            value = IR.Tween(slider.animationType, animationData.current, 0, animationData.endValue - animationData.startValue, duration);       
             value += animationData.startValue;
-  
-            if (value >= animationData.endValue) {
-                slider.stopAnimation();
-                slider.setValue(animationData.endValue);
-                return;
-            }
         } else {
-            value = IR.Tween(IR.TWEEN_LINEAR, animationData.current, 0, animationData.startValue - animationData.endValue, duration); 
+            value = IR.Tween(slider.animationType, animationData.current, 0, animationData.startValue - animationData.endValue, duration); 
             value = animationData.startValue - value;
-            if (value <= animationData.endValue) {
-                slider.stopAnimation();
-                slider.setValue(animationData.endValue);
-                return;
-            }
         }
-        
-        slider.setValue(value);
+
+        if (animationData.current >= animationData.duration) {
+            slider.stopAnimation();
+            slider.setValue(animationData.endValue);
+        } else {
+            slider.setValue(value);
+        }
     };
 
     /**
