@@ -27,9 +27,9 @@ gradient = gradient.concat(createColorGradient(0xFFFF00, 0xFF0000, 15));
 var tempSlider = new SmartSlider(IR.GetPage('Main').GetItem('Slider2'));
 tempSlider
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel2'))
-    .setLabelLimits(260)
+    .setAnimation(1000, IR.TWEEN_CIRC_OUT, 1000)
+    .setValueItemLimits(260)
     .setGradientColors(gradient)
-    .setAnimation(1000, IR.TWEEN_CIRC_OUT)
     .update();
 
 // eslint-disable-next-line no-unused-vars
@@ -39,21 +39,26 @@ function animate() {
 }
 
 function set0() {   // eslint-disable-line no-unused-vars
-    tempSlider.updateX(0, tempSlider.getValue());
+    tempSlider.updateX(0, tempSlider.getValue(), true);
 }
 
 function set10() {  // eslint-disable-line no-unused-vars
-    tempSlider.updateX(10, tempSlider.getValue());
+    tempSlider.updateX(10, tempSlider.getValue(), true);
 }
 
 function set20() {  // eslint-disable-line no-unused-vars
-    tempSlider.updateX(20, tempSlider.getValue());
+    tempSlider.updateX(20, tempSlider.getValue(), true);
 }
 
 function set30() {  // eslint-disable-line no-unused-vars
-    tempSlider.updateX(30, tempSlider.getValue());
+    tempSlider.updateX(30, tempSlider.getValue(), true);
 }
 
 function set40() {  // eslint-disable-line no-unused-vars
-    tempSlider.updateX(40, tempSlider.getValue());
+    tempSlider.updateX(40, tempSlider.getValue(), true);
 }
+
+// IR.SetInterval(10000, function() {
+//     tempSlider.freezeValueItem(!tempSlider.freezedValueItem);
+//     slider.freezeValueItem(!slider.freezedValueItem);   
+// });
