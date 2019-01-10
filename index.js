@@ -14,8 +14,7 @@
 function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     var that = this;
     this.slider = item;
-
-    this.labelFactor = 1;
+    this.direction = this.slider.Direction;
 
     /**
      * Set value label item that is moved together with slider
@@ -24,7 +23,9 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      */
     this.setValueItem = function(item, freeze) {
         this.valueLabel = item;
-        this.valueLabelOffsetX = this.valueLabel.X - this.slider.Width - this.slider.X;
+        this.valueLabelOffset = this.direction ? 
+            (this.valueLabel.X - this.slider.Width - this.slider.X) :
+            (this.valueLabel.Y + this.slider.Height - this.valueLabel.Height - this.slider.Y);
         this.freezedValueItem = freeze;
         return this;
     };
@@ -44,8 +45,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {number} max - maximal X to move value label, if undefined - no limit
      */
     this.setValueItemLimits = function(min, max) {
-        this.minX = min;
-        this.maxX = max;
+        this.min = min;
+        this.max = max;
         return this;
     };
 
@@ -131,21 +132,25 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         if (that.valueLabel) {
             this.valueLabel.Value = value;
             if (!this.freezedValueItem) {
-                var x = this.slider.X;
-                var width = this.slider.Width;
-                var delta = (maxValue <= minValue) ? width : Math.floor(width/(maxValue - minValue) * (value - minValue));
-                var newX = x + delta;
-                newX += that.valueLabelOffsetX;
+                var xy = this.direction ? this.slider.X : this.slider.Y;
+                var range = this.direction ? this.slider.Width : (this.slider.Height - this.valueLabel.Height);
+                var delta = (maxValue <= minValue) ? range : Math.floor(range/(maxValue - minValue) * (value - minValue));
+                var newXY = xy + (this.direction ? delta : -delta);
+                newXY += this.valueLabelOffset;
     
-                if (this.minX) {
-                    newX = (newX > this.minX) ? newX : this.minX;
+                if (this.min) {
+                    newXY = (newXY > this.min) ? newXY : this.min;
                 }
     
-                if (this.maxX) {
-                    newX = (newX < this.maxX) ? newX : this.maxX;
+                if (this.max) {
+                    newXY = (newXY < this.max) ? newXY : this.max;
                 }
    
-                this.valueLabel.X = newX;
+                if (this.direction) {
+                    this.valueLabel.X = newXY;
+                } else  {
+                    this.valueLabel.Y = newXY;
+                }
             }
         }
 

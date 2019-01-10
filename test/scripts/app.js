@@ -32,10 +32,20 @@ tempSlider
     .setGradientColors(gradient)
     .update();
 
+
+
+var hSlider = new SmartSlider(IR.GetPage('Main').GetItem('HSlider'));
+hSlider
+    .setValueItem(IR.GetPage('Main').GetItem('ValueLabelH'))
+    .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
+    .setAnimation(1000, IR.TWEEN_SINE_IN_OUT)
+    .update();
+
 // eslint-disable-next-line no-unused-vars
 function animate() {
     slider.updateX();
     tempSlider.updateX();
+    hSlider.updateX();
 }
 
 function set0() {   // eslint-disable-line no-unused-vars
