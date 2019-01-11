@@ -14,7 +14,7 @@
 function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     var that = this;
     this.slider = item;
-    this.direction = this.slider.Direction;
+    this.direction = this.slider ? this.slider.Direction : 0;
 
     /**
      * Set value label item that is moved together with slider
@@ -23,9 +23,11 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      */
     this.setValueItem = function(item, freeze) {
         this.valueLabel = item;
-        this.valueLabelOffset = this.direction ? 
-            (this.valueLabel.X - this.slider.Width - this.slider.X) :
-            (this.valueLabel.Y + this.slider.Height - this.valueLabel.Height - this.slider.Y);
+        if (this.valueLabel && this.slider) {
+            this.valueLabelOffset = this.direction ? 
+                (this.valueLabel.X - this.slider.Width - this.slider.X) : 
+                this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
+        }
         this.freezedValueItem = freeze;
         return this;
     };
@@ -55,8 +57,10 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {array} gradient - gradient array of colors created with createColorGradient
      */
     this.setGradientColors = function(gradient) {
-        var state = this.slider.GetState(1);
-        this.alphaChannel = state.Color & 0xFF;
+        if (this.slider) {
+            var state = this.slider.GetState(1);
+            this.alphaChannel = state.Color & 0xFF;
+        }
         this.gradient = gradient;
         return this;
     };
@@ -87,7 +91,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         if (animate) { 
             this.updateX(value);
         } else {
-            this.slider.Value = value;
+            if (this.slider) { this.slider.Value = value; }
             this.update();
         }
         return this;
@@ -97,7 +101,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @returns {number} - slider value
      */
     this.getValue = function() {
-        return this.slider.Value;
+        return this.slider ? this.slider.Value : undefined;
     };
 
     /**
@@ -125,15 +129,15 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * Update value item, value item position and slider color
      */
     this.update = function() {
-        var value = this.slider.Value;
-        var maxValue = this.slider.Max;  
-        var minValue = this.slider.Min;   
+        var value = this.slider ? this.slider.Value : null;
+        var maxValue = this.slider ? this.slider.Max : null;  
+        var minValue = this.slider ? this.slider.Min : null;   
 
-        if (that.valueLabel) {
+        if (this.valueLabel) {
             this.valueLabel.Value = value;
-            if (!this.freezedValueItem) {
+            if (this.slider && !this.freezedValueItem) {
                 var xy = this.direction ? this.slider.X : this.slider.Y;
-                var range = this.direction ? this.slider.Width : (this.slider.Height - this.valueLabel.Height);
+                var range = this.direction ? this.slider.Width : this.slider.Height;
                 var delta = (maxValue <= minValue) ? range : Math.floor(range/(maxValue - minValue) * (value - minValue));
                 var newXY = xy + (this.direction ? delta : -delta);
                 newXY += this.valueLabelOffset;
@@ -154,7 +158,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
             }
         }
 
-        if (this.gradient) {
+        if (this.gradient && this.slider) {
             var index = Math.floor(value - minValue);
             index = index < 0 ? 0 : index >= this.gradient.length ? this.gradient.length - 1 : index;
             var colorArr = this.gradient[index];
@@ -174,8 +178,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {boolean} [noDelay] - force animation without update even if animationDelay is set
      */
     this.updateX = function(newValue, startValue, noDelay) {
-        if (newValue == undefined) { newValue = this.slider.Value; }
-        if (startValue == undefined) { startValue = this.slider.Min; }
+        if (newValue == undefined && this.slider) { newValue = this.slider.Value; }
+        if (startValue == undefined && this.slider) { startValue = this.slider.Min; }
         if (!this.animationTime) { 
             this.setValue(newValue);
             return; 
@@ -187,6 +191,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         animationData.duration = this.animationTime;
 
         this.startAnimation(animationData, noDelay ? null : this.animationDelay);
+
+        return this;
     };
 
     /**

@@ -1,19 +1,22 @@
 {
   "name": "smart-slider",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "SmartSlider control for i3pro iridium mobile",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["iridium mobile", "gui"],
+  "keywords": [
+    "iridium mobile",
+    "gui"
+  ],
   "author": {
     "name": "Alexander Pivovarov aka bladerunner2020",
     "email": "pivovarov@gmail.com"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/bladerunner2020/smart-slider"
+    "type": "git",
+    "url": "https://github.com/bladerunner2020/smart-slider"
   },
   "license": "MIT",
   "devDependencies": {}
