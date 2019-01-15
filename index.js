@@ -32,7 +32,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
                         (this.valueLabel.X - this.slider.Width - this.slider.X) : 
                         this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
                     break;
-                case 20:
+                case IR.ITEM_CIRCLE_LEVEL:
                     this.valueLabelRadius = 
                         Math.sqrt(Math.pow(this.slider.X + this.slider.Width/2 - item.X - item.Width/2, 2) + 
                         Math.pow(this.slider.Y + this.slider.Height/2 - item.Y - item.Height/2, 2));
@@ -66,7 +66,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         this.min = min;
         this.max = max;
 
-        if (this.sliderType == 20) {
+        if (this.sliderType == IR.ITEM_CIRCLE_LEVEL) {
             if (this.min != undefined) {
                 this.min = (this.min - 360) * Math.PI/180;
             }
@@ -153,11 +153,11 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
 
 
     this.getMinValue = function() {
-        return this.slider ? (this.sliderType == 20) ? this.slider.MinValue : this.slider.Min : 0;
+        return this.slider ? (this.sliderType == IR.ITEM_CIRCLE_LEVEL) ? this.slider.MinValue : this.slider.Min : 0;
     };
 
     this.getMaxValue = function() {
-        return this.slider ? (this.sliderType == 20) ? this.slider.MaxValue : this.slider.Max : 0;
+        return this.slider ? (this.sliderType == IR.ITEM_CIRCLE_LEVEL) ? this.slider.MaxValue : this.slider.Max : 0;
     };
 
     /**
