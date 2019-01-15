@@ -1,8 +1,8 @@
 {
   "name": "smart-slider",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "SmartSlider control for i3pro iridium mobile",
-  "main": "index.js",
+  "main": "smart-slider.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
