@@ -14,7 +14,8 @@
 function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     var that = this;
     this.slider = item;
-    this.direction = this.slider ? this.slider.Direction : 0;
+    this.sliderType = this.slider ? this.slider.Type : 0;
+    this.direction = (this.sliderType == IR.ITEM_LEVEL) ? this.slider.Direction : 0;
 
     /**
      * Set value label item that is moved together with slider
@@ -23,10 +24,25 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      */
     this.setValueItem = function(item, freeze) {
         this.valueLabel = item;
+
         if (this.valueLabel && this.slider) {
-            this.valueLabelOffset = this.direction ? 
-                (this.valueLabel.X - this.slider.Width - this.slider.X) : 
-                this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
+            switch (this.sliderType) {
+                case IR.ITEM_LEVEL:
+                    this.valueLabelOffset = this.direction ? 
+                        (this.valueLabel.X - this.slider.Width - this.slider.X) : 
+                        this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
+                    break;
+                case 20:
+                    this.valueLabelRadius = 
+                        Math.sqrt(Math.pow(this.slider.X + this.slider.Width/2 - item.X - item.Width/2, 2) + 
+                        Math.pow(this.slider.Y + this.slider.Height/2 - item.Y - item.Height/2, 2));
+                    this.valueLabelOffset =  Math.asin((item.X + item.Width/2 - this.slider.X - this.slider.Width/2)/ this.valueLabelRadius);  
+                    
+                    this.valueLabelOffset -= this.slider.MaxAngle*Math.PI/180;
+                    break;
+                    
+                default:        
+            }
         }
         this.freezedValueItem = freeze;
         return this;
@@ -49,6 +65,16 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     this.setValueItemLimits = function(min, max) {
         this.min = min;
         this.max = max;
+
+        if (this.sliderType == 20) {
+            if (this.min != undefined) {
+                this.min = (this.min - 360) * Math.PI/180;
+            }
+            if (this.max != undefined) {
+                this.max = (this.max - 360) * Math.PI/180;
+            }
+        }
+
         return this;
     };
 
@@ -125,41 +151,98 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         return this;
     };
 
+
+    this.getMinValue = function() {
+        return this.slider ? (this.sliderType == 20) ? this.slider.MinValue : this.slider.Min : 0;
+    };
+
+    this.getMaxValue = function() {
+        return this.slider ? (this.sliderType == 20) ? this.slider.MaxValue : this.slider.Max : 0;
+    };
+
     /**
      * Update value item, value item position and slider color
      */
     this.update = function() {
-        var value = this.slider ? this.slider.Value : null;
-        var maxValue = this.slider ? this.slider.Max : null;  
-        var minValue = this.slider ? this.slider.Min : null;   
+        function calculateXY(value, direction, slider, label, offset, min, max) {
+            var maxValue = slider.Max;
+            var minValue = slider.Min;
+            var xy = direction ? slider.X : slider.Y;
+            var range = direction ? slider.Width : slider.Height;
+            var delta = (maxValue <= minValue) ? range : Math.floor(range/(maxValue - minValue) * (value - minValue));
+            var newXY = xy + (direction ? delta : -delta);
+            newXY += offset;
 
+            if (min) {
+                newXY = (newXY > min) ? newXY : min;
+            }
+
+            if (max) {
+                newXY = (newXY < max) ? newXY : max;
+            }
+            var coordinate = {};
+
+            if (direction) {
+                coordinate.x = newXY;
+                coordinate.y = label.Y;
+            } else  {
+                coordinate.y = newXY;
+                coordinate.x = label.X;
+            }
+
+            return coordinate;
+        }
+
+        function calculateXYCircular(value, slider, label, radius, offset, min, max) {
+            var minAngle = slider.MinAngle;
+            var maxAngle = slider.MaxAngle;
+            var maxValue = slider.MaxValue;
+            var minValue = slider.MinValue;
+            var angle = maxValue == minValue ? 0 : (value - minValue)/(maxValue - minValue) * (maxAngle - minAngle) + minAngle; 
+            angle = angle * Math.PI/180; // degrees to radians
+
+            angle += offset;
+
+            if (min != undefined) {
+                angle = angle < min ? min : angle;
+            }
+
+            if (max != undefined) {
+                angle = angle > max ? max : angle;
+            }
+
+
+
+            var xCenter = slider.X + slider.Width/2;
+            var yCenter = slider.Y + slider.Height/2;
+
+            var coordinate = {};
+            coordinate.x = xCenter + radius * Math.sin(angle) - label.Width/2;
+            coordinate.y = yCenter - radius * Math.cos(angle) - label.Height/2;
+
+            return coordinate;
+        }
+
+        var value = this.slider ? this.slider.Value : null;
+        
         if (this.valueLabel) {
             this.valueLabel.Value = value;
             if (this.slider && !this.freezedValueItem) {
-                var xy = this.direction ? this.slider.X : this.slider.Y;
-                var range = this.direction ? this.slider.Width : this.slider.Height;
-                var delta = (maxValue <= minValue) ? range : Math.floor(range/(maxValue - minValue) * (value - minValue));
-                var newXY = xy + (this.direction ? delta : -delta);
-                newXY += this.valueLabelOffset;
-    
-                if (this.min) {
-                    newXY = (newXY > this.min) ? newXY : this.min;
+
+                var coordinate;
+
+                if (this.sliderType == IR.ITEM_LEVEL) {
+                    coordinate = calculateXY(value, this.direction, this.slider, this.valueLabel, this.valueLabelOffset, this.min, this.max);
+                } else {
+                    coordinate = calculateXYCircular(value, this.slider, this.valueLabel, this.valueLabelRadius, this.valueLabelOffset, this.min, this.max);
                 }
-    
-                if (this.max) {
-                    newXY = (newXY < this.max) ? newXY : this.max;
-                }
-   
-                if (this.direction) {
-                    this.valueLabel.X = newXY;
-                } else  {
-                    this.valueLabel.Y = newXY;
-                }
+                this.valueLabel.X = coordinate.x;
+                this.valueLabel.Y = coordinate.y;
             }
         }
 
         if (this.gradient && this.slider) {
-            var index = Math.floor(value - minValue);
+            var index = Math.floor(value - this.getMinValue());
             index = index < 0 ? 0 : index >= this.gradient.length ? this.gradient.length - 1 : index;
             var colorArr = this.gradient[index];
             var color = colorArr[0] * Math.pow(256, 3) + colorArr[1] * Math.pow(256, 2) + colorArr[2] * Math.pow(256, 1) + this.alphaChannel; 
@@ -179,7 +262,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      */
     this.updateX = function(newValue, startValue, noDelay) {
         if (newValue == undefined && this.slider) { newValue = this.slider.Value; }
-        if (startValue == undefined && this.slider) { startValue = this.slider.Min; }
+        if (startValue == undefined && this.slider) { startValue = this.getMinValue(); }
         if (!this.animationTime) { 
             this.setValue(newValue);
             return; 
@@ -248,7 +331,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     IR.AddListener(IR.EVENT_TOUCH_MOVE, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_ITEM_SHOW, this.slider, function() { 
         var value = this.slider.Value;
-        this.slider.Value = this.slider.Min;
+        this.slider.Value = this.getMinValue();
+        this.update(); // is necessary to update the current status of label
         this.updateX(value); 
     }, this);
 }

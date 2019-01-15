@@ -41,11 +41,32 @@ vSlider
     .setAnimation(1000, IR.TWEEN_SINE_IN_OUT, 2000)
     .update();
 
+
+var circularSlider = new SmartSlider(IR.GetPage('Main').GetItem('CircularLevel'));
+circularSlider
+    .setValueItem(IR.GetPage('Main').GetItem('CValueLabel'))
+    .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
+    // .setValueItemLimits(45, 315)
+    .setAnimation(2000, IR.TWEEN_SINE_IN_OUT, 1500)
+    .update();
+
+
+var circularSlider2 = new SmartSlider(IR.GetPage('Main').GetItem('CircularLevel2'));
+circularSlider2
+    .setValueItem(IR.GetPage('Main').GetItem('CValueLabel2'))
+    .setGradientColors(gradient)
+    .setAnimation(1000, IR.TWEEN_SINE_IN_OUT, 3500)
+    .update();
+
+
+
 // eslint-disable-next-line no-unused-vars
 function animate() {
     slider.updateX();
     tempSlider.updateX();
     vSlider.updateX();
+    circularSlider.updateX();
+    circularSlider2.updateX();
 }
 
 function set0() {   // eslint-disable-line no-unused-vars
