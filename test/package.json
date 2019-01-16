@@ -1,7 +1,7 @@
 {
   "name": "smart-slider-test",
-  "version": "1.5.3",
-  "build": "225",
+  "version": "1.5.4",
+  "build": "234",
   "description": "",
   "main": "gruntfile.js",
   "scripts": {
