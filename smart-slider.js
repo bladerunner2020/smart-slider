@@ -151,6 +151,37 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         return this;
     };
 
+    /**
+     * watch feedback and change slider to the new value with animation
+     * @param {string} feedback - feedback to watch
+     * @param {number} polltime - pollint time (if not set use setAutoUpdate)
+     */
+    this.watchFeedback = function(feedback, polltime) {
+        if (this.autoUpdateTimer &&  polltime) {
+            IR.ClearInterval(this.autoUpdateTimer);
+            this.autoUpdateTimer = null;
+        }
+
+        this.watchedFeedback = feedback;
+
+        if (polltime) {
+            IR.SetInterval(polltime, autoUpdate);
+        }
+
+        return this;
+    };
+
+    function autoUpdate() {
+        if ((!that.animationActive) && that.slider) {
+            var newValue = that.watchedFeedback ? IR.GetVariable(that.watchedFeedback) : undefined;
+            var oldValue = that.slider.Value;
+
+
+            if (newValue == undefined || oldValue != newValue) {
+                that.updateX(newValue, oldValue);
+            }
+        }
+    }
 
     this.getMinValue = function() {
         return this.slider ? (this.sliderType == IR.ITEM_CIRCLE_LEVEL) ? this.slider.MinValue : this.slider.Min : 0;
