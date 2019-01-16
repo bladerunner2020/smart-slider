@@ -15,7 +15,8 @@ slider
     .setValueItem(IR.GetPage('Main').GetItem('ValueLabel'))
     .setGradientColors(createColorGradient(0xFF00FF, 0x00FFFF, 100))
     .setAnimation(1000, IR.TWEEN_SINE_IN_OUT)
-    .setAutoUpdate(500)
+    //.setAutoUpdate(500)
+    .watchFeedback('Global.MyValue', 500)
     .update();
 
 
