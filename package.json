@@ -1,6 +1,6 @@
 {
   "name": "smart-slider",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "SmartSlider control for i3pro iridium mobile",
   "main": "smart-slider.js",
   "scripts": {

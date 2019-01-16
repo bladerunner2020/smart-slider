@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
  */
 
-/* global IR, SmartSlider, createColorGradient */
+/* global IR, SmartSlider, createColorGradient, createColorArray */
 
 _Debug = IR.Log;    // eslint-disable-line no-undef
 
@@ -52,6 +52,7 @@ circularSlider
     .update();
 
 
+gradient = createColorArray([50, 70, 75], [0xFFFFFF, 0x00FF00, 0xFF0000]);
 var circularSlider2 = new SmartSlider(IR.GetPage('Main').GetItem('CircularLevel2'));
 circularSlider2
     .setValueItem(IR.GetPage('Main').GetItem('CValueLabel2'))

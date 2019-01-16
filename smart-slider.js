@@ -85,7 +85,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     this.setGradientColors = function(gradient) {
         if (this.slider) {
             var state = this.slider.GetState(1);
-            this.alphaChannel = state.Color & 0xFF;
+            this.alphaChannel = ((this.sliderType == IR.ITEM_CIRCLE_LEVEL) ? state.BorderColor : state.Color) & 0xFF;
         }
         this.gradient = gradient;
         return this;
@@ -272,13 +272,18 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
             }
         }
 
-        if (this.gradient && this.slider) {
+        if (this.gradient && this.gradient.length && this.slider) {
             var index = Math.floor(value - this.getMinValue());
             index = index < 0 ? 0 : index >= this.gradient.length ? this.gradient.length - 1 : index;
             var colorArr = this.gradient[index];
             var color = colorArr[0] * Math.pow(256, 3) + colorArr[1] * Math.pow(256, 2) + colorArr[2] * Math.pow(256, 1) + this.alphaChannel; 
             var state = this.slider.GetState(1);
-            state.Color = color;
+
+            if (this.sliderType == IR.ITEM_CIRCLE_LEVEL) {
+                state.BorderColor = color;
+            } else {
+                state.Color = color;
+            }
         }
 
         return this;
@@ -368,6 +373,14 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     }, this);
 }
 
+SmartSlider.colorToColorArray = function(color) {
+    var result = [];
+    result[0] = (color >> 16) & 0xFF;
+    result[1] = (color >> 8) & 0xFF;
+    result[2] = color & 0xFF;
+
+    return result;
+};
 
 /**
  * Create color gradient between two colors with specified number of steps
@@ -376,7 +389,7 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
  * @param {number | array} color2 
  * @param {number} steps 
  */
-function createColorGradient(color1, color2, steps) {           // eslint-disable-line 
+function createColorGradient (color1, color2, steps) {           // eslint-disable-line 
     // Returns a single rgb color interpolation between given rgb color
     // based on the factor given; via https://codepen.io/njmcode/pen/axoyD?editors=0010
     function interpolateColor(color1, color2, factor) {
@@ -390,15 +403,6 @@ function createColorGradient(color1, color2, steps) {           // eslint-disabl
         return result;
     }
 
-    function colorToColorArray(color) {
-        var result = [];
-        result[0] = (color >> 16) & 0xFF;
-        result[1] = (color >> 8) & 0xFF;
-        result[2] = color & 0xFF;
-
-        return result;
-    }
-
     if (steps <= 1) {
         return [];
     }
@@ -406,12 +410,41 @@ function createColorGradient(color1, color2, steps) {           // eslint-disabl
     var factor = 1 / (steps - 1); 
     var gradient = [];
 
-    var colorArr1 = (typeof color1 != 'number') ? colorArr1 : colorToColorArray(color1);
-    var colorArr2 = (typeof color2 != 'number') ? colorArr1 : colorToColorArray(color2);
+    var colorArr1 = (typeof color1 != 'number') ? colorArr1 : SmartSlider.colorToColorArray(color1);
+    var colorArr2 = (typeof color2 != 'number') ? colorArr1 : SmartSlider.colorToColorArray(color2);
 
 
     for(var i = 0; i < steps; i++) {
         gradient.push(interpolateColor(colorArr1, colorArr2, factor * i));
+    }
+
+    return gradient;
+}
+
+/**
+ * Create color array that has colorArray[0] for values less than valueArray[0], etc.
+ * Dimension of valueArray and colorArray should be the same
+ *  
+ * @param {array} values valueArray - array of values
+ * @param {array} colors colorArray - array of colors
+ * @returns {array}
+ */
+function createColorArray (valueArray, colorArray) { // eslint-disable-line 
+    if (!valueArray || !colorArray) { return; }
+
+    var gradient = [];
+
+    var index1 = 0;
+    var index2 = 0;
+
+    while (index1 < valueArray.length && index1 < colorArray.length) {
+        if (index2 >= valueArray[index1]) {
+            index1++;
+        } else {
+            var color = colorArray[index1];
+            gradient.push(SmartSlider.colorToColorArray(color));
+            index2++;
+        }
     }
 
     return gradient;
