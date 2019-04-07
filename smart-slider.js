@@ -17,6 +17,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     this.sliderType = this.slider ? this.slider.Type : 0;
     this.direction = (this.sliderType == IR.ITEM_LEVEL) ? this.slider.Direction : 0;
 
+    this.disableUpdateOnWatch = false;
+
     /**
      * Set value label item that is moved together with slider
      * @param {object} item - value label item 
@@ -27,21 +29,21 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
 
         if (this.valueLabel && this.slider) {
             switch (this.sliderType) {
-                case IR.ITEM_LEVEL:
-                    this.valueLabelOffset = this.direction ? 
-                        (this.valueLabel.X - this.slider.Width - this.slider.X) : 
-                        this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
-                    break;
-                case IR.ITEM_CIRCLE_LEVEL:
-                    this.valueLabelRadius = 
+            case IR.ITEM_LEVEL:
+                this.valueLabelOffset = this.direction ? 
+                    (this.valueLabel.X - this.slider.Width - this.slider.X) : 
+                    this.slider.Height - this.valueLabel.Height - (this.slider.Y - this.valueLabel.Y - this.valueLabel.Height);
+                break;
+            case IR.ITEM_CIRCLE_LEVEL:
+                this.valueLabelRadius = 
                         Math.sqrt(Math.pow(this.slider.X + this.slider.Width/2 - item.X - item.Width/2, 2) + 
                         Math.pow(this.slider.Y + this.slider.Height/2 - item.Y - item.Height/2, 2));
-                    this.valueLabelOffset =  Math.asin((item.X + item.Width/2 - this.slider.X - this.slider.Width/2)/ this.valueLabelRadius);  
+                this.valueLabelOffset =  Math.asin((item.X + item.Width/2 - this.slider.X - this.slider.Width/2)/ this.valueLabelRadius);  
                     
-                    this.valueLabelOffset -= this.slider.MaxAngle*Math.PI/180;
-                    break;
+                this.valueLabelOffset -= this.slider.MaxAngle*Math.PI/180;
+                break;
                     
-                default:        
+            default:        
             }
         }
         this.freezedValueItem = freeze;
@@ -157,12 +159,31 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {number} polltime - pollint time (if not set use setAutoUpdate)
      */
     this.watchFeedback = function(feedback, polltime) {
-        if (this.autoUpdateTimer &&  polltime) {
+        if (this.autoUpdateTimer && polltime) {
             IR.ClearInterval(this.autoUpdateTimer);
             this.autoUpdateTimer = null;
         }
 
         this.watchedFeedback = feedback;
+
+        if (!feedback) {
+            return this;
+        }
+
+        var arr = feedback.split('.');
+        if (arr.length === 3 && arr[0] === 'Drivers') {
+            var driver = IR.GetDevice(arr[1]);
+            if (driver) {
+                // eslint-disable-next-line no-unused-vars
+                IR.AddListener(IR.EVENT_TAG_CHANGE, driver, function(tag, value) {
+                    if (tag === arr[2]) {
+                        autoUpdate();      
+                    }
+                });
+                return this;
+            }
+            // If driver is not found run standard algorithm with setInterval...
+        }
 
         if (polltime) {
             IR.SetInterval(polltime, autoUpdate);
@@ -172,10 +193,9 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
     };
 
     function autoUpdate() {
-        if ((!that.animationActive) && that.slider) {
+        if ((!that.animationActive) && that.slider && !that.disableUpdateOnWatch) {
             var newValue = that.watchedFeedback ? IR.GetVariable(that.watchedFeedback) : undefined;
             var oldValue = that.slider.Value;
-
 
             if (newValue == undefined || oldValue != newValue) {
                 that.updateX(newValue, oldValue);
@@ -297,8 +317,8 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
      * @param {boolean} [noDelay] - force animation without update even if animationDelay is set
      */
     this.updateX = function(newValue, startValue, noDelay) {
-        if (newValue == undefined && this.slider) { newValue = this.slider.Value; }
-        if (startValue == undefined && this.slider) { startValue = this.getMinValue(); }
+        if (newValue === undefined && this.slider) { newValue = this.slider.Value; }
+        if (startValue === undefined && this.slider) { startValue = this.getMinValue(); }
         if (!this.animationTime) { 
             this.setValue(newValue);
             return; 
@@ -361,16 +381,26 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         IR.RemoveListener(IR.EVENT_WORK, 0, this.onTick);
     };
 
+
     IR.AddListener(IR.EVENT_MOUSE_MOVE, this.slider, this.update, this);
-    IR.AddListener(IR.EVENT_ITEM_PRESS, this.slider, this.update, this);
+    IR.AddListener(IR.EVENT_ITEM_PRESS, this.slider, function() {
+        that.disableUpdateOnWatch = true;
+        that.update();
+    });
+    IR.AddListener(IR.EVENT_ITEM_RELEASE, this.slider, function() {
+        that.disableUpdateOnWatch = false;
+    });
+
     IR.AddListener(IR.EVENT_TOUCH_DOWN, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_TOUCH_MOVE, this.slider, this.update, this);
     IR.AddListener(IR.EVENT_ITEM_SHOW, this.slider, function() { 
-        var value = this.slider.Value;
-        this.slider.Value = this.getMinValue();
-        this.update(); // is necessary to update the current status of label
-        this.updateX(value); 
-    }, this);
+        that.disableUpdateOnWatch = false;
+        var value = that.watchedFeedback ? IR.GetVariable(that.watchedFeedback) : that.slider.Value;
+        // var value = this.slider.Value;
+        that.slider.Value = that.getMinValue();
+        that.update(); // is necessary to update the current status of label
+        that.updateX(value); 
+    });
 }
 
 SmartSlider.colorToColorArray = function(color) {
