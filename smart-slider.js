@@ -174,10 +174,9 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         if (arr.length === 3 && arr[0] === 'Drivers') {
             var driver = IR.GetDevice(arr[1]);
             if (driver) {
-                // eslint-disable-next-line no-unused-vars
                 IR.AddListener(IR.EVENT_TAG_CHANGE, driver, function(tag, value) {
                     if (tag === arr[2]) {
-                        autoUpdate();      
+                        autoUpdate(value);      
                     }
                 });
                 return this;
@@ -192,9 +191,18 @@ function SmartSlider(item) {        // eslint-disable-line no-unused-vars
         return this;
     };
 
-    function autoUpdate() {
+    function autoUpdate(val) {
+        if (that.animationActive) {
+            // If watchFeedback is used on a driver the new value could come during animation 
+            // and without this line it will not be set!
+            that.stopAnimation();
+        }
+
         if ((!that.animationActive) && that.slider && !that.disableUpdateOnWatch) {
-            var newValue = that.watchedFeedback ? IR.GetVariable(that.watchedFeedback) : undefined;
+            var newValue = val;
+            if (typeof val === 'undefined' && that.watchedFeedback) {
+                newValue = IR.GetVariable(that.watchedFeedback);
+            }
             var oldValue = that.slider.Value;
 
             if (newValue == undefined || oldValue != newValue) {
